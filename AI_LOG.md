@@ -26,6 +26,7 @@
 | 2026-09-21 | 5. Triukšmo robustness | `05_robustness_noise.ipynb`: Gauso triukšmas tik standartizuotame TEST, `sigma` 0.0–0.5, tas pats noisy TEST visiems modeliams | Priimta. `sigma=0` sutapo su 2/3 etapų TEST; hiperparametrai neperrinkti. |
 | 2026-09-21 | 6. Klaidų analizė | `06_error_analysis.ipynb`: confusion matrices, per-class/per-subject metrikos, realūs klaidingi TEST pavyzdžiai | Priimta. TEST metrikos sutapo su 2/3 etapais; 1–5 notebook’ai nekeisti. |
 | 2026-09-21 | 7. Galutinė suvestinė | `07_final_analysis.ipynb` ir `results/final_analysis_summary.md`: 1–6 etapų rezultatų surinkimas, ribos ir rizikos | Priimta. Naujų modelių ir eksperimentų nebuvo; Majority klaidos perskaičiuotos iš to paties split. |
+| 2026-09-21 | 8. Atkuriamumas | `main.py`: viena komanda atkuria split ir clean TEST palyginimą; palyginimas su `final_model_comparison.csv` | Priimta. Be GridSearch; dataset ieškomas po `data/`; `.gitignore` leidžia trackinti svarbiausius CSV. |
 
 ## Atmesti AI pasiūlymai
 

@@ -18,9 +18,21 @@ Thumbs.db
 .idea/
 .vscode/
 
-# Generated split artifacts (recreated from local dataset)
+# Intermediate split / array artifacts (recreated from local dataset)
 results/*.npz
 results/*.npy
-results/*.csv
 results/*.json
+
+# Ignore generated CSV by default, then keep final evidence tables
+results/*.csv
 !results/.gitkeep
+!results/baseline_results.csv
+!results/intelligent_models_results.csv
+!results/ablation_results.csv
+!results/noise_robustness_results.csv
+!results/per_class_metrics.csv
+!results/top_confusion_pairs.csv
+!results/misclassified_examples.csv
+!results/per_subject_metrics.csv
+!results/final_model_comparison.csv
+!results/reproduced_main_results.csv
