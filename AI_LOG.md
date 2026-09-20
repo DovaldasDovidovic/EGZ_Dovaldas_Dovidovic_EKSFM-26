@@ -1,0 +1,34 @@
+# AI naudojimo auditas
+
+Šis failas fiksuoja, kaip projekte naudotas dirbtinis intelektas: kokie pasiūlymai priimti, kokie atmesti ir kokios klaidos pastebėtos. Įrašai daromi tik tada, kai jie realiai įvyksta.
+
+## Meta
+
+- Dalykas: Intelektualiosios sistemos
+- Projektas: Human Activity Recognition (UCI HAR)
+- Studentas: Dovaldas Dovidovič, EKSFM-26
+
+## Registravimo taisyklės
+
+1. Neregistruoti išgalvotų klaidų ar atmestų pasiūlymų.
+2. Kiekvienam įrašui nurodyti datą, etapą ir trumpą faktą.
+3. Jei AI pasiūlymas priimtas be pakeitimų — taip ir pažymėti.
+4. Jei studentas pataisė ar atmetė — aprašyti priežastį.
+
+## Priimti AI pasiūlymai
+
+| Data | Etapas | Pasiūlymas | Pastaba |
+|------|--------|------------|---------|
+| 2026-09-20 | 1. Duomenų paruošimas | Projekto struktūra, `01_data_preparation.ipynb`, subject-disjoint skaidymas su `GroupShuffleSplit` (`RANDOM_STATE = 42`) | Priimta. Notebook paleistas lokaliai; skaičiai gauti iš realių UCI failų. |
+
+## Atmesti AI pasiūlymai
+
+| Data | Etapas | Pasiūlymas | Priežastis |
+|------|--------|------------|------------|
+| — | — | — | Kol kas nėra. |
+
+## Pastebėtos AI klaidos
+
+| Data | Etapas | Kas buvo negerai | Kaip pataisyta |
+|------|--------|-------------------|----------------|
+| 2026-09-20 | 1. Duomenų paruošimas | Promptas rėmėsi keliu `data/UCI HAR Dataset/`, bet lokaliai rinkinys yra `data/human+activity+recognition+using+smartphones (2)/UCI HAR Dataset/UCI HAR Dataset/` | Notebook ieško `features.txt` po `data/` ir naudoja rastą realų kelią. Originalūs dataset failai neperkelti ir neištrinti. |

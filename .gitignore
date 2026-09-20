@@ -1,0 +1,26 @@
+# Local UCI HAR dataset (do not upload to GitHub)
+data/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Generated split artifacts (recreated from local dataset)
+results/*.npz
+results/*.npy
+results/*.csv
+results/*.json
+!results/.gitkeep
