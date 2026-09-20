@@ -25,6 +25,7 @@
 | 2026-09-21 | 4. Požymių abliacija | `04_ablation.ipynb`: Acc/Gyro/All grupės iš `feature_names`; k-NN, SVM, MLP su ankstesniais parametrais, be naujo GridSearch | Priimta. All features sutapo su 2/3 etapų TEST; `matplotlib` įrašytas į `requirements.txt`. |
 | 2026-09-21 | 5. Triukšmo robustness | `05_robustness_noise.ipynb`: Gauso triukšmas tik standartizuotame TEST, `sigma` 0.0–0.5, tas pats noisy TEST visiems modeliams | Priimta. `sigma=0` sutapo su 2/3 etapų TEST; hiperparametrai neperrinkti. |
 | 2026-09-21 | 6. Klaidų analizė | `06_error_analysis.ipynb`: confusion matrices, per-class/per-subject metrikos, realūs klaidingi TEST pavyzdžiai | Priimta. TEST metrikos sutapo su 2/3 etapais; 1–5 notebook’ai nekeisti. |
+| 2026-09-21 | 7. Galutinė suvestinė | `07_final_analysis.ipynb` ir `results/final_analysis_summary.md`: 1–6 etapų rezultatų surinkimas, ribos ir rizikos | Priimta. Naujų modelių ir eksperimentų nebuvo; Majority klaidos perskaičiuotos iš to paties split. |
 
 ## Atmesti AI pasiūlymai
 
