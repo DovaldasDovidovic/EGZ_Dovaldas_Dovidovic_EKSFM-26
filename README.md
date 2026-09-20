@@ -15,6 +15,7 @@ Eksperimento tikslas — įvertinti modelių gebėjimą atpažinti **mokymo metu
 3. Intelektualieji metodai: linijinis daugiaklasis SVM (`LinearSVC`) ir MLP.
 4. Požymių abliacija: accelerometer-only, gyroscope-only ir visi 561 požymiai (k-NN, SVM, MLP).
 5. Robustness: Gauso triukšmas standartizuotame TEST (`sigma ∈ {0.0, 0.1, 0.2, 0.3, 0.5}`).
+6. Klaidų analizė švariame TEST: confusion matrix, per-class metrikos, klaidų pavyzdžiai, per-subject Macro-F1.
 
 
 
@@ -50,7 +51,7 @@ Ten turi būti `features.txt`, `activity_labels.txt`, `train/` ir `test/` failai
 
 ```text
 data/          # lokalus UCI HAR datasetas (gitignore)
-notebooks/     # etapų notebook'ai (duomenys, baseline, SVM/MLP, abliacija, robustness)
+notebooks/     # etapų notebook'ai (duomenys, modeliai, abliacija, robustness, klaidų analizė)
 results/       # skaidymas, lentelės ir grafikų failai
 src/           # pagalbinis kodas (vėlesniems etapams)
 ```
@@ -66,6 +67,7 @@ jupyter notebook notebooks/02_baselines.ipynb
 jupyter notebook notebooks/03_intelligent_models.ipynb
 jupyter notebook notebooks/04_ablation.ipynb
 jupyter notebook notebooks/05_robustness_noise.ipynb
+jupyter notebook notebooks/06_error_analysis.ipynb
 ```
 
-Kiekvieną notebook paleiskite nuo pradžios iki pabaigos (Run All). 2 etapui reikia `results/subject_disjoint_split.npz`, 3 etapui — dar ir `results/baseline_results.csv`, 4–5 etapams — tų pačių failų ir `results/intelligent_models_results.csv`.
+Kiekvieną notebook paleiskite nuo pradžios iki pabaigos (Run All). 2 etapui reikia `results/subject_disjoint_split.npz`, 3 etapui — dar ir `results/baseline_results.csv`, 4–6 etapams — tų pačių failų ir `results/intelligent_models_results.csv`.
