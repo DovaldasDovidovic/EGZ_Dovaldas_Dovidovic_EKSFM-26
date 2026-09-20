@@ -9,15 +9,21 @@ Parengti atkuriamą žmogaus veiklos atpažinimo (Human Activity Recognition, HA
 Eksperimento tikslas — įvertinti modelių gebėjimą atpažinti **mokymo metu nematyto žmogaus** veiklą.
 
 Šiuo metu baigti etapai:
+
 1. Duomenų paruošimas ir fiksuotas subject-disjoint TRAIN/TEST skaidymas.
-2. Baseline modeliai: Majority Class ir k-NN (be SVM, MLP, SOM).
+2. Baseline modeliai: Majority Class ir k-NN.
+3. Intelektualieji metodai: linijinis daugiaklasis SVM (`LinearSVC`) ir MLP (be SOM, abliacijos ir robustness).
+
+
 
 ## Duomenų rinkinys
 
 Naudojamas oficialus **UCI Human Activity Recognition Using Smartphones** duomenų rinkinys.
 
-- Oficiali nuoroda: https://archive.ics.uci.edu/dataset/240/human+activity+recognition+using+smartphones
+- Oficiali nuoroda: [https://archive.ics.uci.edu/dataset/240/human+activity+recognition+using+smartphones](https://archive.ics.uci.edu/dataset/240/human+activity+recognition+using+smartphones)
 - Šaltinis: UCI Machine Learning Repository (ne Kaggle ir ne GitHub veidrodžiai).
+
+
 
 ## Kur lokaliai turi būti datasetas
 
@@ -34,16 +40,20 @@ Ten turi būti `features.txt`, `activity_labels.txt`, `train/` ir `test/` failai
 - Fiksuotas atsitiktinumo sėklos parametras: `RANDOM_STATE = 42`.
 - Galutinis train/test skaidymas atliekamas **pagal subject ID**, ne pagal atsitiktinius įrašus (`sklearn.model_selection.GroupShuffleSplit`, apie 70 % / 30 % žmonių).
 - Tas pats žmogus negali būti ir TRAIN, ir TEST dalyje.
-- k-NN hiperparametrai parenkami tik TRAIN dalyje su `GroupKFold` pagal subject ID (`Pipeline`: `StandardScaler` + `KNeighborsClassifier`).
+- k-NN, SVM ir MLP hiperparametrai parenkami tik TRAIN dalyje su `GroupKFold` pagal subject ID. `StandardScaler` visada yra `Pipeline` viduje.
+
+
 
 ## Projekto struktūra
 
 ```text
 data/          # lokalus UCI HAR datasetas (gitignore)
-notebooks/     # duomenų paruošimo ir baseline notebook'ai
-results/       # skaidymas ir baseline lentelės
+notebooks/     # duomenų paruošimo, baseline ir SVM/MLP notebook'ai
+results/       # skaidymas ir etapų rezultatų lentelės
 src/           # pagalbinis kodas (vėlesniems etapams)
 ```
+
+
 
 ## Paleidimas
 
@@ -51,6 +61,7 @@ src/           # pagalbinis kodas (vėlesniems etapams)
 python -m pip install -r requirements.txt
 jupyter notebook notebooks/01_data_preparation.ipynb
 jupyter notebook notebooks/02_baselines.ipynb
+jupyter notebook notebooks/03_intelligent_models.ipynb
 ```
 
-Kiekvieną notebook paleiskite nuo pradžios iki pabaigos (Run All). Antrą etapą paleiskite tik tada, kai jau yra `results/subject_disjoint_split.npz`.
+Kiekvieną notebook paleiskite nuo pradžios iki pabaigos (Run All). 2 etapui reikia `results/subject_disjoint_split.npz`, 3 etapui — dar ir `results/baseline_results.csv`.

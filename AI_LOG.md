@@ -21,6 +21,7 @@
 |------|--------|------------|---------|
 | 2026-09-20 | 1. Duomenų paruošimas | Projekto struktūra, `01_data_preparation.ipynb`, subject-disjoint skaidymas su `GroupShuffleSplit` (`RANDOM_STATE = 42`) | Priimta. Notebook paleistas lokaliai; skaičiai gauti iš realių UCI failų. |
 | 2026-09-20 | 2. Baseline modeliai | `02_baselines.ipynb`: Majority Class ir k-NN `Pipeline` (`StandardScaler` + `KNeighborsClassifier`), `GroupKFold` tik TRAIN, TEST tik galutiniam įvertinimui | Priimta. Naudotas jau esamas `subject_disjoint_split.npz`; naujas split nekurtas. |
+| 2026-09-20 | 3. SVM ir MLP | `03_intelligent_models.ipynb`: `LinearSVC` ir `MLPClassifier` su `Pipeline`+`GroupKFold`, SVM `decision_function`+`argmax` sutikrinta su `predict()` | Priimta. Tas pats split; baseline CSV tik užkrautas, neperrašytas. |
 
 ## Atmesti AI pasiūlymai
 
