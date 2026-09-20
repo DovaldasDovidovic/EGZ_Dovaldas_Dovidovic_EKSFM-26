@@ -12,7 +12,8 @@ Eksperimento tikslas — įvertinti modelių gebėjimą atpažinti **mokymo metu
 
 1. Duomenų paruošimas ir fiksuotas subject-disjoint TRAIN/TEST skaidymas.
 2. Baseline modeliai: Majority Class ir k-NN.
-3. Intelektualieji metodai: linijinis daugiaklasis SVM (`LinearSVC`) ir MLP (be SOM, abliacijos ir robustness).
+3. Intelektualieji metodai: linijinis daugiaklasis SVM (`LinearSVC`) ir MLP.
+4. Požymių abliacija: accelerometer-only, gyroscope-only ir visi 561 požymiai (k-NN, SVM, MLP).
 
 
 
@@ -48,8 +49,8 @@ Ten turi būti `features.txt`, `activity_labels.txt`, `train/` ir `test/` failai
 
 ```text
 data/          # lokalus UCI HAR datasetas (gitignore)
-notebooks/     # duomenų paruošimo, baseline ir SVM/MLP notebook'ai
-results/       # skaidymas ir etapų rezultatų lentelės
+notebooks/     # etapų notebook'ai (duomenys, baseline, SVM/MLP, abliacija)
+results/       # skaidymas, lentelės ir abliacijos grafikai
 src/           # pagalbinis kodas (vėlesniems etapams)
 ```
 
@@ -62,6 +63,7 @@ python -m pip install -r requirements.txt
 jupyter notebook notebooks/01_data_preparation.ipynb
 jupyter notebook notebooks/02_baselines.ipynb
 jupyter notebook notebooks/03_intelligent_models.ipynb
+jupyter notebook notebooks/04_ablation.ipynb
 ```
 
-Kiekvieną notebook paleiskite nuo pradžios iki pabaigos (Run All). 2 etapui reikia `results/subject_disjoint_split.npz`, 3 etapui — dar ir `results/baseline_results.csv`.
+Kiekvieną notebook paleiskite nuo pradžios iki pabaigos (Run All). 2 etapui reikia `results/subject_disjoint_split.npz`, 3 etapui — dar ir `results/baseline_results.csv`, 4 etapui — tų pačių failų ir `results/intelligent_models_results.csv`.
