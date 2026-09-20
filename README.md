@@ -14,6 +14,7 @@ Eksperimento tikslas — įvertinti modelių gebėjimą atpažinti **mokymo metu
 2. Baseline modeliai: Majority Class ir k-NN.
 3. Intelektualieji metodai: linijinis daugiaklasis SVM (`LinearSVC`) ir MLP.
 4. Požymių abliacija: accelerometer-only, gyroscope-only ir visi 561 požymiai (k-NN, SVM, MLP).
+5. Robustness: Gauso triukšmas standartizuotame TEST (`sigma ∈ {0.0, 0.1, 0.2, 0.3, 0.5}`).
 
 
 
@@ -41,7 +42,7 @@ Ten turi būti `features.txt`, `activity_labels.txt`, `train/` ir `test/` failai
 - Fiksuotas atsitiktinumo sėklos parametras: `RANDOM_STATE = 42`.
 - Galutinis train/test skaidymas atliekamas **pagal subject ID**, ne pagal atsitiktinius įrašus (`sklearn.model_selection.GroupShuffleSplit`, apie 70 % / 30 % žmonių).
 - Tas pats žmogus negali būti ir TRAIN, ir TEST dalyje.
-- k-NN, SVM ir MLP hiperparametrai parenkami tik TRAIN dalyje su `GroupKFold` pagal subject ID. `StandardScaler` visada yra `Pipeline` viduje.
+- k-NN, SVM ir MLP hiperparametrai parenkami tik TRAIN dalyje su `GroupKFold` pagal subject ID. 2–4 etapuose `StandardScaler` yra `Pipeline` viduje; 5 etape scaler `fit` daromas aiškiai ant švaraus TRAIN, kad Gauso triukšmą būtų galima pridėti jau standartizuotam TEST.
 
 
 
@@ -49,8 +50,8 @@ Ten turi būti `features.txt`, `activity_labels.txt`, `train/` ir `test/` failai
 
 ```text
 data/          # lokalus UCI HAR datasetas (gitignore)
-notebooks/     # etapų notebook'ai (duomenys, baseline, SVM/MLP, abliacija)
-results/       # skaidymas, lentelės ir abliacijos grafikai
+notebooks/     # etapų notebook'ai (duomenys, baseline, SVM/MLP, abliacija, robustness)
+results/       # skaidymas, lentelės ir grafikų failai
 src/           # pagalbinis kodas (vėlesniems etapams)
 ```
 
@@ -64,6 +65,7 @@ jupyter notebook notebooks/01_data_preparation.ipynb
 jupyter notebook notebooks/02_baselines.ipynb
 jupyter notebook notebooks/03_intelligent_models.ipynb
 jupyter notebook notebooks/04_ablation.ipynb
+jupyter notebook notebooks/05_robustness_noise.ipynb
 ```
 
-Kiekvieną notebook paleiskite nuo pradžios iki pabaigos (Run All). 2 etapui reikia `results/subject_disjoint_split.npz`, 3 etapui — dar ir `results/baseline_results.csv`, 4 etapui — tų pačių failų ir `results/intelligent_models_results.csv`.
+Kiekvieną notebook paleiskite nuo pradžios iki pabaigos (Run All). 2 etapui reikia `results/subject_disjoint_split.npz`, 3 etapui — dar ir `results/baseline_results.csv`, 4–5 etapams — tų pačių failų ir `results/intelligent_models_results.csv`.
