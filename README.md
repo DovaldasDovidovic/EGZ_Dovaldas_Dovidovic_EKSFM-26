@@ -121,13 +121,13 @@ python main.py
 Detali abliacija, robustness ir klaidų analizė lieka notebook'uose:
 
 ```bash
-jupyter notebook notebooks/01_data_preparation.ipynb
-jupyter notebook notebooks/02_baselines.ipynb
-jupyter notebook notebooks/03_intelligent_models.ipynb
-jupyter notebook notebooks/04_ablation.ipynb
-jupyter notebook notebooks/05_robustness_noise.ipynb
-jupyter notebook notebooks/06_error_analysis.ipynb
-jupyter notebook notebooks/07_final_analysis.ipynb
+jupyter notebook notebooks/01_data_preparation-duomenu_paruosimas.ipynb
+jupyter notebook notebooks/02_baselines-baziniai_metodai.ipynb
+jupyter notebook notebooks/03_intelligent_models-SVM_MLP.ipynb
+jupyter notebook notebooks/04_ablation-pozymiu_abliacija.ipynb
+jupyter notebook notebooks/05_robustness_noise-atsparumas_triuksmui.ipynb
+jupyter notebook notebooks/06_error_analysis-klaidu_analize.ipynb
+jupyter notebook notebooks/07_final_analysis-galutine_analize.ipynb
 ```
 
 Kiekvieną notebook paleiskite nuo pradžios iki pabaigos (Run All). Jie nėra būtini `python main.py`.
