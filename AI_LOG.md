@@ -2,21 +2,9 @@
 
 Šis failas fiksuoja, kaip projekte naudotas dirbtinis intelektas: svarbiausios užklausos, priimti ir pakeisti pasiūlymai, aptiktos klaidos / nepatikrintos prielaidos ir kaip jos patikrintos. Įrašai daromi tik tada, kai jie realiai įvyksta.
 
-## Meta
 
-- Dalykas: Intelektualiosios sistemos
-- Projektas: Human Activity Recognition (UCI HAR)
-- Studentas: Dovaldas Dovidovič, EKSFM-26
+## Svarbiausios AI užklausos
 
-## 1. Kaip AI buvo naudojamas
-
-AI (Cursor) naudotas kaip pagalbinė priemonė: projekto ir notebook’ų struktūrai, eksperimentų kodui (duomenų paruošimas, baseline, SVM/MLP, abliacija, robustness, klaidų analizė, `main.py`) ir dokumentacijai (`README.md`, `requirements.txt`, šis žurnalas).
-
-Galutiniai skaitiniai rezultatai **nebuvo priimami iš AI atminties**. Jie tikrinti realiai vykdant kodą (Jupyter Run All / `nbconvert` ir `python main.py`). Hipotezės ir priežastys notebook’uose atskirtos nuo faktų.
-
-## 2. Svarbiausios AI užklausos
-
-Žemiau — **užklausų santraukos**, ne pažodinės promptų kopijos.
 
 | Data | Etapas | Užklausos santrauka |
 |------|--------|---------------------|
@@ -31,7 +19,7 @@ Galutiniai skaitiniai rezultatai **nebuvo priimami iš AI atminties**. Jie tikri
 
 Papildomai: po 8 etapo paprašyta pataisyti README 7 etapo eilutę ir `pandas` versijos ribą `requirements.txt`, kad atitiktų realiai patikrintą aplinką.
 
-## 3. Priimti AI pasiūlymai
+## Priimti AI pasiūlymai
 
 Svarbiausi priimti sprendimai ir kaip jie patikrinti:
 
@@ -45,7 +33,7 @@ Svarbiausi priimti sprendimai ir kaip jie patikrinti:
 | 2026-09-21 | 6–7 | Klaidų analizė ir galutinė suvestinė be naujo tuning | Metrikos perskaičiuotos / nuskaitomos iš CSV; 7 etapas naujų modelių nekūrė. |
 | 2026-09-21 | 8 | `python main.py` + palyginimas su `final_model_comparison.csv` | Realus paleidimas: `REPRODUCIBILITY CHECK: PASSED`. |
 
-## 4. Atmesti arba pakeisti AI pasiūlymai / prielaidos
+## Atmesti arba pakeisti AI pasiūlymai / prielaidos
 
 Išgalvotų „atmestų metodų“ (pvz. kito split ar kito klasifikatoriaus) nebuvo. Realūs pakeitimai:
 
@@ -55,7 +43,7 @@ Išgalvotų „atmestų metodų“ (pvz. kito split ar kito klasifikatoriaus) ne
 | 2026-09-21 | 4 | Pradinėje `requirements.txt` nebuvo `matplotlib`, nors abliacijos notebook’ui grafiko reikėjo | Priklausomybė įrašyta po to, kai importas realiai nepavyko. |
 | 2026-09-21 | 8 | `requirements.txt`: `pandas>=2.0,<3` | Pakeista į `pandas>=2.0,<4`, nes sėkmingas `python main.py` vyko su pandas 3.0.6. |
 
-## 5. AI klaidos arba nepatikrintos prielaidos ir jų patikra
+## AI klaidos arba nepatikrintos prielaidos ir jų patikra
 
 ### A) Dataset kelio / katalogų struktūros prielaida (1 ir 8 etapai)
 
@@ -85,4 +73,3 @@ Išgalvotų „atmestų metodų“ (pvz. kito split ar kito klasifikatoriaus) ne
 
 1. Neregistruoti išgalvotų klaidų ar atmestų pasiūlymų.
 2. Netyčinis proceso nutraukimas (pvz. Ctrl+C) nelaikomas AI klaida.
-3. Jei studentas pataisė ar atmetė pasiūlymą — aprašyti priežastį.
