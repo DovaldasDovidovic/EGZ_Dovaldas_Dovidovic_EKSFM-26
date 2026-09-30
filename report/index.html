@@ -127,6 +127,13 @@
       font-size: 13px; margin: 10px 0 0; color: var(--ink);
     }
     .how b { color: var(--accent); display: block; margin-bottom: 4px; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; }
+    details.feat-list {
+      margin-top: 12px; background: #f7f4ee; border-radius: 10px; padding: 10px 14px;
+    }
+    details.feat-list summary { cursor: pointer; font-size: 13px; color: var(--accent); font-weight: 700; }
+    details.feat-list ol {
+      margin: 10px 0 0; padding-left: 1.4rem; font-size: 12px; columns: 2; gap: 24px;
+    }
     footer { margin-top: 40px; color: var(--muted); font-size: 13px; }
     @media (max-width: 900px) {
       .stats { grid-template-columns: repeat(3, 1fr); }
@@ -143,6 +150,7 @@
     <a href="#atsparumas">Atsparumas</a>
     <a href="#klaidos">Klaidos</a>
     <a href="#generalizacija">Generalizacija</a>
+    <a href="#grrf">GRRF atranka</a>
     <a href="#isvados">Išvados</a>
   </nav>
 
@@ -180,6 +188,7 @@
           <div><dt>Subject-disjoint</dt><dd>TRAIN ir TEST nėra tų pačių žmonių.</dd></div>
           <div><dt>Confusion Matrix</dt><dd>Lentelė: eilutė = tikra veikla, stulpelis = modelio prognozė.</dd></div>
           <div><dt>TRAIN / TEST</dt><dd>TRAIN – duomenys mokymui. TEST – galutiniam patikrinimui (čia 9 nematytų žmonių įrašai).</dd></div>
+          <div><dt>GRRF-inspired</dt><dd>Požymių atranka pagal GRRF principą (straipsnio (6)–(8) lygtys) Python aplinkoje. Tai nėra identiška originaliam R RRF paketui.</dd></div>
         </dl>
       </div>
     </section>
@@ -354,6 +363,129 @@
       </div>
     </section>
 
+    <section id="grrf">
+      <h2>GRRF principu paremta požymių atranka</h2>
+      <p class="sub">Python realizacija pagal Thakur ir Biswas (2022) (6)–(8) lygtis, ne identiškas CRAN RRF. Atranka ir parametrų parinkimas – tik TRAIN. Čia nerašome, kad metodas pagerino klasifikavimą.</p>
+
+      <h3 class="kicker" style="margin:0 0 10px">1. Pradinis GRRF eksperimentas</h3>
+      <p class="sub">Tas pats LinearSVC (C=0.01) ir tas pats TEST. Skiriasi tik požymių rinkinys. Skaičiai iš <code>grrf_inspired_vs_svm.csv</code>.</p>
+      <div class="card" style="overflow:auto;margin-bottom:28px">
+        <table>
+          <thead>
+            <tr>
+              <th>Metodas</th><th>Požymiai</th><th>Pašalinta</th>
+              <th>Macro-F1</th><th>Balanced Accuracy</th><th>Accuracy</th><th>TEST Errors</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>SVM (visi 561 požymiai)<span class="tiny">LinearSVC, C=0.01</span></td>
+              <td>561</td><td>0 (0 %)</td>
+              <td>0.897130</td><td>0.893666</td><td>0.890016</td><td>347</td>
+            </tr>
+            <tr>
+              <td>GRRF-inspired + SVM<span class="tiny">γ=1, n_tree=100, mtry=√p</span></td>
+              <td>254</td><td>307 (54.72 %)</td>
+              <td>0.881137</td><td>0.876256</td><td>0.873851</td><td>398</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="how"><b>Kaip skaityti?</b>Macro-F1, Balanced Accuracy ir Accuracy: 0–1, daugiau = geriau. TEST Errors: mažiau = geriau. Šis pirmas variantas smarkiai trumpino požymių rinkinį ir TEST kokybė krito (Δ Macro-F1 −0.015992, +51 klaida).</div>
+      </div>
+
+      <h3 class="kicker" style="margin:0 0 10px">2. Parametrų parinkimas tik TRAIN</h3>
+      <p class="sub">5 dalių GroupKFold pagal TRAIN subject ID. Galutinis TEST čia nenaudotas. G5 pasirinktas pagal didžiausią vidutinį CV Macro-F1; tarp artimų (±0.003) – mažiau požymių. Šaltinis: <code>grrf_inspired_groupkfold_tuning.csv</code>.</p>
+      <div class="card" style="overflow:auto;margin-bottom:28px">
+        <table>
+          <thead>
+            <tr>
+              <th>id</th><th>γ</th><th>λ</th><th>n_tree</th><th>mtry</th>
+              <th>CV Macro-F1</th><th>std</th><th>Vid. požymių</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>BASE<span class="tiny">SVM, 561 požymiai</span></td>
+              <td>—</td><td>—</td><td>—</td><td>all</td>
+              <td>0.961494</td><td>0.018258</td><td>561.0</td>
+            </tr>
+            <tr>
+              <td>G1</td><td>1.0</td><td>—</td><td>50</td><td>sqrt</td>
+              <td>0.949908</td><td>0.017987</td><td>212.2</td>
+            </tr>
+            <tr>
+              <td>G2</td><td>1.0</td><td>—</td><td>100</td><td>sqrt</td>
+              <td>0.955026</td><td>0.016008</td><td>243.4</td>
+            </tr>
+            <tr>
+              <td>G3</td><td>1.0</td><td>—</td><td>100</td><td>2sqrt</td>
+              <td>0.947490</td><td>0.013083</td><td>175.4</td>
+            </tr>
+            <tr>
+              <td>G4</td><td>0.5</td><td>1.0</td><td>100</td><td>sqrt</td>
+              <td>0.961383</td><td>0.018288</td><td>560.4</td>
+            </tr>
+            <tr class="hi">
+              <td>G5<span class="tiny">pasirinkta pagal TRAIN CV</span></td>
+              <td>0.5</td><td>0.1</td><td>100</td><td>sqrt</td>
+              <td>0.961735</td><td>0.017728</td><td>510.8</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="how"><b>Kaip skaityti?</b>CV Macro-F1 – vidurkis iš 5 fold’ų (tik TRAIN žmonės). λ prie γ=1 nenaudojamas (formulėje neįeina). G5 TRAIN-CV beveik sutampa su BASE (+0.000241) – tai ne TEST rezultatas.</div>
+      </div>
+
+      <h3 class="kicker" style="margin:0 0 10px">3. Galutinis G5 ir SVM palyginimas TEST</h3>
+      <p class="sub">Tas pats TEST: 3155 įrašai, 9 mokymo metu nematytų žmonių. G5 kaukė perskaičiuota visame TRAIN, tada vienas predict. Šaltinis: <code>grrf_g5_vs_svm_test.csv</code>.</p>
+      <div class="card" style="overflow:auto;margin-bottom:28px">
+        <table>
+          <thead>
+            <tr>
+              <th>Metodas</th><th>Požymiai</th><th>Pašalinta</th>
+              <th>Macro-F1</th><th>Balanced Accuracy</th><th>Accuracy</th><th>TEST Errors</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>SVM (visi 561 požymiai)</td>
+              <td>561</td><td>0 (0 %)</td>
+              <td>0.897130</td><td>0.893666</td><td>0.890016</td><td>347</td>
+            </tr>
+            <tr class="hi">
+              <td>G5 GRRF-inspired + SVM</td>
+              <td>523</td><td>38 (6.77 %)</td>
+              <td>0.894047</td><td>0.889972</td><td>0.886529</td><td>358</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="qa">
+          <h3>Ką matome?</h3>
+          <p>GRRF principu paremta atranka šiek tiek sumažino požymių skaičių (561 → 523), tačiau klasifikavimo kokybė taip pat nežymiai sumažėjo (Macro-F1 0.897130 → 0.894047, +11 TEST klaidų). Skirtumas mažas; pagerėjimu to nevadiname.</p>
+        </div>
+      </div>
+
+      <h3 class="kicker" style="margin:0 0 10px">4. Galutinio G5 atrinkti požymiai</h3>
+      <p class="sub">Suvestinė iš <code>grrf_g5_selected_features.csv</code>. Visas 523 vardų sąrašas – išskleidžiamame bloke.</p>
+      <div class="card" style="margin-bottom:28px">
+        <div class="metrics">
+          <div><b>Atrinkta</b>523 iš 561</div>
+          <div><b>Pašalinta</b>38 (6.77 %)</div>
+          <div><b>Kaukė</b>tik iš viso TRAIN (7144 / 21)</div>
+        </div>
+        <details class="feat-list">
+          <summary>Rodyti visus 523 atrinktų požymių pavadinimus</summary>
+          <ol id="g5-feat-ol"></ol>
+        </details>
+      </div>
+
+      <h3 class="kicker" style="margin:0 0 10px">5. G5 + SVM painiavos matrica</h3>
+      <p class="sub">Eilutė = tikroji veikla. Stulpelis = modelio prognozė. Šaltinis: <code>grrf_g5_svm_confusion_matrix.csv</code>.</p>
+      <div class="card cm-wrap">
+        <svg id="chart-cm-g5" class="chart" viewBox="0 0 520 440" role="img" aria-label="G5 SVM 6x6 painiavos matrica"></svg>
+        <div class="how"><b>Kaip skaityti?</b>Įstrižainė = teisingos prognozės. Už jos = klaidos. Didžiausios: STANDING→SITTING 98, LAYING→STANDING 85, SITTING→STANDING 73. Ta pati SITTING ↔ STANDING problema kaip ir 561 SVM.</div>
+      </div>
+    </section>
+
     <section id="isvados">
       <h2>Galutinė santrauka</h2>
       <div class="grid-3">
@@ -363,7 +495,7 @@
         </div>
         <div class="card">
           <h3 class="kicker">Ką parodė eksperimentai</h3>
-          <p>Generalizacija nematytiems žmonėms; visi požymiai geriau už siauresnes jutiklių grupes; atliktas atsparumo triukšmui bandymas; nustatytos SITTING/STANDING ir LAYING→STANDING painiavos.</p>
+          <p>Generalizacija nematytiems žmonėms; visi požymiai geriau už siauresnes jutiklių grupes; atliktas atsparumo triukšmui bandymas; nustatytos SITTING/STANDING ir LAYING→STANDING painiavos. GRRF principu paremta atranka šiek tiek sumažino požymių skaičių, bet klasifikavimo kokybė taip pat nežymiai krito.</p>
         </div>
         <div class="card">
           <h3 class="kicker">Ribos</h3>
@@ -420,6 +552,15 @@
       [0, 0, 0, 97, 487, 0],
       [0, 0, 0, 0, 83, 516]
     ];
+    const cmG5 = [
+      [504, 2, 0, 2, 0, 0],
+      [5, 414, 1, 64, 0, 0],
+      [3, 21, 409, 3, 0, 0],
+      [0, 1, 0, 470, 73, 0],
+      [0, 0, 0, 98, 486, 0],
+      [0, 0, 0, 0, 85, 514]
+    ];
+    const g5FeatNames = ["tBodyAcc-mean()-Y", "tBodyAcc-mean()-Z", "tBodyAcc-std()-X", "tBodyAcc-std()-Y", "tBodyAcc-std()-Z", "tBodyAcc-mad()-X", "tBodyAcc-mad()-Y", "tBodyAcc-max()-X", "tBodyAcc-max()-Z", "tBodyAcc-min()-X", "tBodyAcc-min()-Y", "tBodyAcc-min()-Z", "tBodyAcc-sma()", "tBodyAcc-energy()-X", "tBodyAcc-energy()-Y", "tBodyAcc-energy()-Z", "tBodyAcc-iqr()-X", "tBodyAcc-iqr()-Y", "tBodyAcc-iqr()-Z", "tBodyAcc-entropy()-X", "tBodyAcc-entropy()-Y", "tBodyAcc-arCoeff()-X,1", "tBodyAcc-arCoeff()-X,2", "tBodyAcc-arCoeff()-X,3", "tBodyAcc-arCoeff()-X,4", "tBodyAcc-arCoeff()-Y,1", "tBodyAcc-arCoeff()-Y,2", "tBodyAcc-arCoeff()-Y,4", "tBodyAcc-arCoeff()-Z,1", "tBodyAcc-arCoeff()-Z,2", "tBodyAcc-arCoeff()-Z,3", "tBodyAcc-arCoeff()-Z,4", "tBodyAcc-correlation()-X,Y", "tBodyAcc-correlation()-X,Z", "tBodyAcc-correlation()-Y,Z", "tGravityAcc-mean()-X", "tGravityAcc-mean()-Y", "tGravityAcc-mean()-Z", "tGravityAcc-std()-X", "tGravityAcc-std()-Y", "tGravityAcc-std()-Z", "tGravityAcc-mad()-X", "tGravityAcc-mad()-Y", "tGravityAcc-mad()-Z", "tGravityAcc-max()-X", "tGravityAcc-max()-Y", "tGravityAcc-max()-Z", "tGravityAcc-min()-X", "tGravityAcc-min()-Y", "tGravityAcc-min()-Z", "tGravityAcc-sma()", "tGravityAcc-energy()-X", "tGravityAcc-energy()-Y", "tGravityAcc-energy()-Z", "tGravityAcc-iqr()-X", "tGravityAcc-iqr()-Y", "tGravityAcc-iqr()-Z", "tGravityAcc-entropy()-X", "tGravityAcc-entropy()-Y", "tGravityAcc-entropy()-Z", "tGravityAcc-arCoeff()-X,1", "tGravityAcc-arCoeff()-X,2", "tGravityAcc-arCoeff()-X,3", "tGravityAcc-arCoeff()-X,4", "tGravityAcc-arCoeff()-Y,1", "tGravityAcc-arCoeff()-Y,2", "tGravityAcc-arCoeff()-Y,3", "tGravityAcc-arCoeff()-Y,4", "tGravityAcc-arCoeff()-Z,1", "tGravityAcc-arCoeff()-Z,2", "tGravityAcc-arCoeff()-Z,3", "tGravityAcc-arCoeff()-Z,4", "tGravityAcc-correlation()-X,Y", "tGravityAcc-correlation()-X,Z", "tGravityAcc-correlation()-Y,Z", "tBodyAccJerk-mean()-Z", "tBodyAccJerk-std()-X", "tBodyAccJerk-std()-Y", "tBodyAccJerk-std()-Z", "tBodyAccJerk-mad()-X", "tBodyAccJerk-mad()-Y", "tBodyAccJerk-mad()-Z", "tBodyAccJerk-max()-X", "tBodyAccJerk-max()-Y", "tBodyAccJerk-max()-Z", "tBodyAccJerk-min()-X", "tBodyAccJerk-min()-Y", "tBodyAccJerk-min()-Z", "tBodyAccJerk-sma()", "tBodyAccJerk-energy()-X", "tBodyAccJerk-energy()-Z", "tBodyAccJerk-iqr()-X", "tBodyAccJerk-iqr()-Y", "tBodyAccJerk-iqr()-Z", "tBodyAccJerk-entropy()-X", "tBodyAccJerk-entropy()-Y", "tBodyAccJerk-entropy()-Z", "tBodyAccJerk-arCoeff()-X,1", "tBodyAccJerk-arCoeff()-X,2", "tBodyAccJerk-arCoeff()-X,3", "tBodyAccJerk-arCoeff()-X,4", "tBodyAccJerk-arCoeff()-Y,1", "tBodyAccJerk-arCoeff()-Y,2", "tBodyAccJerk-arCoeff()-Y,3", "tBodyAccJerk-arCoeff()-Y,4", "tBodyAccJerk-arCoeff()-Z,1", "tBodyAccJerk-arCoeff()-Z,2", "tBodyAccJerk-arCoeff()-Z,3", "tBodyAccJerk-arCoeff()-Z,4", "tBodyAccJerk-correlation()-X,Y", "tBodyAccJerk-correlation()-X,Z", "tBodyAccJerk-correlation()-Y,Z", "tBodyGyro-mean()-X", "tBodyGyro-mean()-Y", "tBodyGyro-mean()-Z", "tBodyGyro-std()-X", "tBodyGyro-std()-Y", "tBodyGyro-std()-Z", "tBodyGyro-mad()-X", "tBodyGyro-mad()-Y", "tBodyGyro-mad()-Z", "tBodyGyro-max()-X", "tBodyGyro-max()-Y", "tBodyGyro-max()-Z", "tBodyGyro-min()-X", "tBodyGyro-min()-Y", "tBodyGyro-min()-Z", "tBodyGyro-sma()", "tBodyGyro-energy()-X", "tBodyGyro-energy()-Y", "tBodyGyro-energy()-Z", "tBodyGyro-iqr()-X", "tBodyGyro-iqr()-Y", "tBodyGyro-iqr()-Z", "tBodyGyro-entropy()-X", "tBodyGyro-entropy()-Y", "tBodyGyro-entropy()-Z", "tBodyGyro-arCoeff()-X,1", "tBodyGyro-arCoeff()-X,2", "tBodyGyro-arCoeff()-X,3", "tBodyGyro-arCoeff()-X,4", "tBodyGyro-arCoeff()-Y,1", "tBodyGyro-arCoeff()-Y,2", "tBodyGyro-arCoeff()-Y,3", "tBodyGyro-arCoeff()-Y,4", "tBodyGyro-arCoeff()-Z,1", "tBodyGyro-arCoeff()-Z,2", "tBodyGyro-arCoeff()-Z,3", "tBodyGyro-arCoeff()-Z,4", "tBodyGyro-correlation()-X,Y", "tBodyGyro-correlation()-X,Z", "tBodyGyro-correlation()-Y,Z", "tBodyGyroJerk-mean()-X", "tBodyGyroJerk-mean()-Y", "tBodyGyroJerk-mean()-Z", "tBodyGyroJerk-std()-X", "tBodyGyroJerk-std()-Y", "tBodyGyroJerk-std()-Z", "tBodyGyroJerk-mad()-X", "tBodyGyroJerk-mad()-Y", "tBodyGyroJerk-mad()-Z", "tBodyGyroJerk-max()-X", "tBodyGyroJerk-max()-Y", "tBodyGyroJerk-max()-Z", "tBodyGyroJerk-min()-X", "tBodyGyroJerk-min()-Y", "tBodyGyroJerk-min()-Z", "tBodyGyroJerk-sma()", "tBodyGyroJerk-energy()-X", "tBodyGyroJerk-energy()-Y", "tBodyGyroJerk-energy()-Z", "tBodyGyroJerk-iqr()-X", "tBodyGyroJerk-iqr()-Y", "tBodyGyroJerk-iqr()-Z", "tBodyGyroJerk-entropy()-X", "tBodyGyroJerk-entropy()-Y", "tBodyGyroJerk-entropy()-Z", "tBodyGyroJerk-arCoeff()-X,1", "tBodyGyroJerk-arCoeff()-X,2", "tBodyGyroJerk-arCoeff()-X,3", "tBodyGyroJerk-arCoeff()-X,4", "tBodyGyroJerk-arCoeff()-Y,1", "tBodyGyroJerk-arCoeff()-Y,2", "tBodyGyroJerk-arCoeff()-Y,3", "tBodyGyroJerk-arCoeff()-Y,4", "tBodyGyroJerk-arCoeff()-Z,1", "tBodyGyroJerk-arCoeff()-Z,2", "tBodyGyroJerk-arCoeff()-Z,3", "tBodyGyroJerk-arCoeff()-Z,4", "tBodyGyroJerk-correlation()-X,Y", "tBodyGyroJerk-correlation()-X,Z", "tBodyGyroJerk-correlation()-Y,Z", "tBodyAccMag-std()", "tBodyAccMag-mad()", "tBodyAccMag-max()", "tBodyAccMag-min()", "tBodyAccMag-sma()", "tBodyAccMag-energy()", "tBodyAccMag-iqr()", "tBodyAccMag-arCoeff()1", "tBodyAccMag-arCoeff()2", "tBodyAccMag-arCoeff()4", "tGravityAccMag-std()", "tGravityAccMag-mad()", "tGravityAccMag-max()", "tGravityAccMag-min()", "tGravityAccMag-sma()", "tGravityAccMag-energy()", "tGravityAccMag-iqr()", "tGravityAccMag-entropy()", "tGravityAccMag-arCoeff()1", "tGravityAccMag-arCoeff()2", "tGravityAccMag-arCoeff()3", "tGravityAccMag-arCoeff()4", "tBodyAccJerkMag-mean()", "tBodyAccJerkMag-std()", "tBodyAccJerkMag-mad()", "tBodyAccJerkMag-min()", "tBodyAccJerkMag-sma()", "tBodyAccJerkMag-energy()", "tBodyAccJerkMag-iqr()", "tBodyAccJerkMag-entropy()", "tBodyAccJerkMag-arCoeff()1", "tBodyAccJerkMag-arCoeff()2", "tBodyAccJerkMag-arCoeff()3", "tBodyAccJerkMag-arCoeff()4", "tBodyGyroMag-mean()", "tBodyGyroMag-std()", "tBodyGyroMag-mad()", "tBodyGyroMag-min()", "tBodyGyroMag-sma()", "tBodyGyroMag-energy()", "tBodyGyroMag-iqr()", "tBodyGyroMag-entropy()", "tBodyGyroMag-arCoeff()1", "tBodyGyroMag-arCoeff()2", "tBodyGyroMag-arCoeff()3", "tBodyGyroMag-arCoeff()4", "tBodyGyroJerkMag-mean()", "tBodyGyroJerkMag-std()", "tBodyGyroJerkMag-mad()", "tBodyGyroJerkMag-max()", "tBodyGyroJerkMag-min()", "tBodyGyroJerkMag-sma()", "tBodyGyroJerkMag-energy()", "tBodyGyroJerkMag-iqr()", "tBodyGyroJerkMag-arCoeff()1", "tBodyGyroJerkMag-arCoeff()2", "tBodyGyroJerkMag-arCoeff()3", "tBodyGyroJerkMag-arCoeff()4", "fBodyAcc-mean()-X", "fBodyAcc-mean()-Y", "fBodyAcc-mean()-Z", "fBodyAcc-std()-X", "fBodyAcc-std()-Y", "fBodyAcc-std()-Z", "fBodyAcc-mad()-X", "fBodyAcc-mad()-Y", "fBodyAcc-mad()-Z", "fBodyAcc-max()-X", "fBodyAcc-max()-Y", "fBodyAcc-max()-Z", "fBodyAcc-min()-X", "fBodyAcc-min()-Z", "fBodyAcc-sma()", "fBodyAcc-energy()-X", "fBodyAcc-energy()-Y", "fBodyAcc-energy()-Z", "fBodyAcc-iqr()-X", "fBodyAcc-iqr()-Z", "fBodyAcc-entropy()-X", "fBodyAcc-entropy()-Y", "fBodyAcc-maxInds-X", "fBodyAcc-maxInds-Y", "fBodyAcc-maxInds-Z", "fBodyAcc-meanFreq()-X", "fBodyAcc-meanFreq()-Y", "fBodyAcc-meanFreq()-Z", "fBodyAcc-skewness()-X", "fBodyAcc-kurtosis()-X", "fBodyAcc-skewness()-Y", "fBodyAcc-kurtosis()-Y", "fBodyAcc-skewness()-Z", "fBodyAcc-kurtosis()-Z", "fBodyAcc-bandsEnergy()-1,8", "fBodyAcc-bandsEnergy()-9,16", "fBodyAcc-bandsEnergy()-17,24", "fBodyAcc-bandsEnergy()-25,32", "fBodyAcc-bandsEnergy()-33,40", "fBodyAcc-bandsEnergy()-41,48", "fBodyAcc-bandsEnergy()-49,56", "fBodyAcc-bandsEnergy()-57,64", "fBodyAcc-bandsEnergy()-1,16", "fBodyAcc-bandsEnergy()-17,32", "fBodyAcc-bandsEnergy()-33,48", "fBodyAcc-bandsEnergy()-49,64", "fBodyAcc-bandsEnergy()-1,24", "fBodyAcc-bandsEnergy()-25,48", "fBodyAcc-bandsEnergy()-1,8_2", "fBodyAcc-bandsEnergy()-9,16_2", "fBodyAcc-bandsEnergy()-17,24_2", "fBodyAcc-bandsEnergy()-25,32_2", "fBodyAcc-bandsEnergy()-41,48_2", "fBodyAcc-bandsEnergy()-57,64_2", "fBodyAcc-bandsEnergy()-1,16_2", "fBodyAcc-bandsEnergy()-17,32_2", "fBodyAcc-bandsEnergy()-33,48_2", "fBodyAcc-bandsEnergy()-49,64_2", "fBodyAcc-bandsEnergy()-1,24_2", "fBodyAcc-bandsEnergy()-25,48_2", "fBodyAcc-bandsEnergy()-1,8_3", "fBodyAcc-bandsEnergy()-9,16_3", "fBodyAcc-bandsEnergy()-17,24_3", "fBodyAcc-bandsEnergy()-25,32_3", "fBodyAcc-bandsEnergy()-33,40_3", "fBodyAcc-bandsEnergy()-41,48_3", "fBodyAcc-bandsEnergy()-49,56_3", "fBodyAcc-bandsEnergy()-57,64_3", "fBodyAcc-bandsEnergy()-1,16_3", "fBodyAcc-bandsEnergy()-17,32_3", "fBodyAcc-bandsEnergy()-49,64_3", "fBodyAcc-bandsEnergy()-25,48_3", "fBodyAccJerk-mean()-X", "fBodyAccJerk-mean()-Y", "fBodyAccJerk-mean()-Z", "fBodyAccJerk-std()-X", "fBodyAccJerk-std()-Y", "fBodyAccJerk-std()-Z", "fBodyAccJerk-mad()-X", "fBodyAccJerk-mad()-Y", "fBodyAccJerk-mad()-Z", "fBodyAccJerk-max()-X", "fBodyAccJerk-max()-Y", "fBodyAccJerk-max()-Z", "fBodyAccJerk-min()-X", "fBodyAccJerk-min()-Z", "fBodyAccJerk-sma()", "fBodyAccJerk-energy()-X", "fBodyAccJerk-energy()-Y", "fBodyAccJerk-energy()-Z", "fBodyAccJerk-iqr()-X", "fBodyAccJerk-iqr()-Y", "fBodyAccJerk-iqr()-Z", "fBodyAccJerk-entropy()-X", "fBodyAccJerk-entropy()-Y", "fBodyAccJerk-maxInds-X", "fBodyAccJerk-maxInds-Y", "fBodyAccJerk-maxInds-Z", "fBodyAccJerk-meanFreq()-X", "fBodyAccJerk-meanFreq()-Y", "fBodyAccJerk-meanFreq()-Z", "fBodyAccJerk-skewness()-X", "fBodyAccJerk-skewness()-Y", "fBodyAccJerk-kurtosis()-Y", "fBodyAccJerk-skewness()-Z", "fBodyAccJerk-kurtosis()-Z", "fBodyAccJerk-bandsEnergy()-1,8", "fBodyAccJerk-bandsEnergy()-9,16", "fBodyAccJerk-bandsEnergy()-17,24", "fBodyAccJerk-bandsEnergy()-25,32", "fBodyAccJerk-bandsEnergy()-33,40", "fBodyAccJerk-bandsEnergy()-41,48", "fBodyAccJerk-bandsEnergy()-49,56", "fBodyAccJerk-bandsEnergy()-57,64", "fBodyAccJerk-bandsEnergy()-1,16", "fBodyAccJerk-bandsEnergy()-17,32", "fBodyAccJerk-bandsEnergy()-33,48", "fBodyAccJerk-bandsEnergy()-49,64", "fBodyAccJerk-bandsEnergy()-1,24", "fBodyAccJerk-bandsEnergy()-25,48", "fBodyAccJerk-bandsEnergy()-1,8_2", "fBodyAccJerk-bandsEnergy()-9,16_2", "fBodyAccJerk-bandsEnergy()-17,24_2", "fBodyAccJerk-bandsEnergy()-25,32_2", "fBodyAccJerk-bandsEnergy()-49,56_2", "fBodyAccJerk-bandsEnergy()-57,64_2", "fBodyAccJerk-bandsEnergy()-1,16_2", "fBodyAccJerk-bandsEnergy()-17,32_2", "fBodyAccJerk-bandsEnergy()-33,48_2", "fBodyAccJerk-bandsEnergy()-49,64_2", "fBodyAccJerk-bandsEnergy()-1,24_2", "fBodyAccJerk-bandsEnergy()-25,48_2", "fBodyAccJerk-bandsEnergy()-1,8_3", "fBodyAccJerk-bandsEnergy()-9,16_3", "fBodyAccJerk-bandsEnergy()-17,24_3", "fBodyAccJerk-bandsEnergy()-25,32_3", "fBodyAccJerk-bandsEnergy()-33,40_3", "fBodyAccJerk-bandsEnergy()-41,48_3", "fBodyAccJerk-bandsEnergy()-49,56_3", "fBodyAccJerk-bandsEnergy()-57,64_3", "fBodyAccJerk-bandsEnergy()-1,16_3", "fBodyAccJerk-bandsEnergy()-17,32_3", "fBodyAccJerk-bandsEnergy()-33,48_3", "fBodyAccJerk-bandsEnergy()-49,64_3", "fBodyAccJerk-bandsEnergy()-1,24_3", "fBodyAccJerk-bandsEnergy()-25,48_3", "fBodyGyro-mean()-X", "fBodyGyro-mean()-Y", "fBodyGyro-mean()-Z", "fBodyGyro-std()-X", "fBodyGyro-std()-Y", "fBodyGyro-std()-Z", "fBodyGyro-mad()-X", "fBodyGyro-mad()-Y", "fBodyGyro-mad()-Z", "fBodyGyro-max()-X", "fBodyGyro-max()-Y", "fBodyGyro-max()-Z", "fBodyGyro-min()-X", "fBodyGyro-min()-Y", "fBodyGyro-min()-Z", "fBodyGyro-sma()", "fBodyGyro-energy()-X", "fBodyGyro-energy()-Y", "fBodyGyro-energy()-Z", "fBodyGyro-iqr()-X", "fBodyGyro-iqr()-Y", "fBodyGyro-iqr()-Z", "fBodyGyro-entropy()-X", "fBodyGyro-entropy()-Z", "fBodyGyro-maxInds-X", "fBodyGyro-maxInds-Y", "fBodyGyro-maxInds-Z", "fBodyGyro-meanFreq()-X", "fBodyGyro-meanFreq()-Y", "fBodyGyro-meanFreq()-Z", "fBodyGyro-skewness()-X", "fBodyGyro-kurtosis()-X", "fBodyGyro-skewness()-Y", "fBodyGyro-kurtosis()-Y", "fBodyGyro-skewness()-Z", "fBodyGyro-kurtosis()-Z", "fBodyGyro-bandsEnergy()-1,8", "fBodyGyro-bandsEnergy()-9,16", "fBodyGyro-bandsEnergy()-17,24", "fBodyGyro-bandsEnergy()-33,40", "fBodyGyro-bandsEnergy()-41,48", "fBodyGyro-bandsEnergy()-49,56", "fBodyGyro-bandsEnergy()-57,64", "fBodyGyro-bandsEnergy()-1,16", "fBodyGyro-bandsEnergy()-17,32", "fBodyGyro-bandsEnergy()-33,48", "fBodyGyro-bandsEnergy()-49,64", "fBodyGyro-bandsEnergy()-1,24", "fBodyGyro-bandsEnergy()-25,48", "fBodyGyro-bandsEnergy()-1,8_2", "fBodyGyro-bandsEnergy()-9,16_2", "fBodyGyro-bandsEnergy()-17,24_2", "fBodyGyro-bandsEnergy()-25,32_2", "fBodyGyro-bandsEnergy()-33,40_2", "fBodyGyro-bandsEnergy()-49,56_2", "fBodyGyro-bandsEnergy()-57,64_2", "fBodyGyro-bandsEnergy()-1,16_2", "fBodyGyro-bandsEnergy()-17,32_2", "fBodyGyro-bandsEnergy()-33,48_2", "fBodyGyro-bandsEnergy()-49,64_2", "fBodyGyro-bandsEnergy()-1,24_2", "fBodyGyro-bandsEnergy()-25,48_2", "fBodyGyro-bandsEnergy()-1,8_3", "fBodyGyro-bandsEnergy()-9,16_3", "fBodyGyro-bandsEnergy()-17,24_3", "fBodyGyro-bandsEnergy()-25,32_3", "fBodyGyro-bandsEnergy()-33,40_3", "fBodyGyro-bandsEnergy()-41,48_3", "fBodyGyro-bandsEnergy()-49,56_3", "fBodyGyro-bandsEnergy()-57,64_3", "fBodyGyro-bandsEnergy()-1,16_3", "fBodyGyro-bandsEnergy()-17,32_3", "fBodyGyro-bandsEnergy()-33,48_3", "fBodyGyro-bandsEnergy()-49,64_3", "fBodyGyro-bandsEnergy()-1,24_3", "fBodyGyro-bandsEnergy()-25,48_3", "fBodyAccMag-mean()", "fBodyAccMag-std()", "fBodyAccMag-mad()", "fBodyAccMag-max()", "fBodyAccMag-min()", "fBodyAccMag-sma()", "fBodyAccMag-energy()", "fBodyAccMag-iqr()", "fBodyAccMag-entropy()", "fBodyAccMag-meanFreq()", "fBodyAccMag-skewness()", "fBodyBodyAccJerkMag-mean()", "fBodyBodyAccJerkMag-std()", "fBodyBodyAccJerkMag-mad()", "fBodyBodyAccJerkMag-max()", "fBodyBodyAccJerkMag-min()", "fBodyBodyAccJerkMag-sma()", "fBodyBodyAccJerkMag-energy()", "fBodyBodyAccJerkMag-entropy()", "fBodyBodyAccJerkMag-meanFreq()", "fBodyBodyAccJerkMag-skewness()", "fBodyBodyAccJerkMag-kurtosis()", "fBodyBodyGyroMag-mean()", "fBodyBodyGyroMag-std()", "fBodyBodyGyroMag-mad()", "fBodyBodyGyroMag-max()", "fBodyBodyGyroMag-sma()", "fBodyBodyGyroMag-energy()", "fBodyBodyGyroMag-maxInds", "fBodyBodyGyroMag-meanFreq()", "fBodyBodyGyroMag-skewness()", "fBodyBodyGyroMag-kurtosis()", "fBodyBodyGyroJerkMag-mean()", "fBodyBodyGyroJerkMag-std()", "fBodyBodyGyroJerkMag-mad()", "fBodyBodyGyroJerkMag-max()", "fBodyBodyGyroJerkMag-min()", "fBodyBodyGyroJerkMag-sma()", "fBodyBodyGyroJerkMag-iqr()", "fBodyBodyGyroJerkMag-entropy()", "fBodyBodyGyroJerkMag-maxInds", "fBodyBodyGyroJerkMag-meanFreq()", "fBodyBodyGyroJerkMag-skewness()", "fBodyBodyGyroJerkMag-kurtosis()", "angle(tBodyAccMean,gravity)", "angle(tBodyAccJerkMean),gravityMean)", "angle(tBodyGyroMean,gravityMean)", "angle(tBodyGyroJerkMean,gravityMean)", "angle(X,gravityMean)", "angle(Y,gravityMean)", "angle(Z,gravityMean)"];
     const subjects = [9, 10, 13, 16, 18, 24, 25, 28, 29];
     const subjF1 = {
       "k-NN": [0.8463631179830533, 0.7356412966120441, 0.8961195316361116, 0.8320209212582671, 0.7611786063398966, 0.9436141184728921, 0.7262257800167635, 0.8201758896581319, 0.9612736970631707],
@@ -540,6 +681,9 @@
     lineChart("chart-noise", noise.xs, noise.series, 0.68, 0.95, "Triukšmo stiprumas σ (X)", "Macro-F1 (0–1, daugiau = geriau)");
     hbars("chart-errors", svmPairs);
     heatmap("chart-cm", cmLabels, cm);
+    heatmap("chart-cm-g5", cmLabels, cmG5);
+    const g5ol = document.getElementById("g5-feat-ol");
+    if (g5ol) g5FeatNames.forEach(n => { const li = document.createElement("li"); li.textContent = n; g5ol.appendChild(li); });
     lineChart("chart-subjects", [0, 1, 2, 3, 4, 5, 6, 7, 8], [
       { name: "k-NN", color: "#5a7d99", values: subjF1["k-NN"] },
       { name: "SVM", color: "#1e4f73", values: subjF1.SVM },
